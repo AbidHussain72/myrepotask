@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="Description" content="Enter your description here" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <script type='text/javascript' src='https://raw.githubusercontent.com/BinaryMuse/ngInfiniteScroll/1.0.0/build/ng-infinite-scroll.min.js'></script>
+
+  <title>E-Commerce</title>
+</head>
+
+<body infinite-scroll="myPagingFunction()" infinite-scroll-distance="3" ng-app="mainApp" ng-controller="mainController">
+
+  <div style="position: fixed; color:#fff; padding: 10px; text-align:center; bottom:0; width:100vw; background-color: #000; z-index:1000;" class=" d-sm-block d-lg-none d-md-none">
+    <h4 ng-click="showMe()">Filter</h4>
+  </div>
+  <div class="row">
+    <div id="showMeNow" class="col-md-3 col-lg-3 col-sm-6  d-lg-block d-sm-none d-md-none">
+      <div class="accordion accordion-flush border" >
+        <div ng-repeat="item in filters | filter:filterProducts" class="accordion-item ">
+          <h2 class="accordion-header" id="flush-heading{{$index + 1}}">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse{{$index + 1}}" aria-expanded="false" aria-controls="flush-collapse{{$index + 1}}">
+              {{item.filter_lable}}
+            </button>
+          </h2>
+          <div id="flush-collapse{{$index + 1}}" class="accordion-collapse collapse" aria-labelledby="flush-heading{{$index + 1}}">
+            <div class="accordion-body">
+              <ul class="list-group">
+                <li ng-repeat="option in item.options" class="list-group-item borderless">
+                  <input class="form-check-input" type="checkbox" id="option_{{option.value}}" ng-change="filterProduct(option.value)" ng-model="isChecked" ng-checked="isChecked">
+                  <label for="" class="ms-3">
+                     {{ option.value}}
+                  </label>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12 col-lg-9 col-sm-6">
+      <div class="row">
+        <div ng-repeat="rec in products" id="addcart" style="position:relative" class="col-md-4 col-lg-3 col-sm-5 card borderless p-2">
+          <img src="{{rec.image}}" class="card-img-top" alt="...">
+          <p class="card-text mt-2">{{rec.name}}</p>
+          <p>Rs. {{rec.price}}</p>
+          <div  id="cartDiv" class="col-md-12 bg-danger p-5" style="position:absolute; overflow: hidden; bottom:-50px;display:none;">
+            <button class="bth btn-dark-outline">Add to cart</button>
+          </div>
+        </div>
+
+      </div>
+       <div infinite-scroll="loadMore()" infinite-scroll-distance="1"></div>
+    </div>
+  </div>
+
+
+</body>
+<script>
+  var app = angular.module('mainApp', []);
+  app.controller('mainController', function($scope, $http) {
+      $scope.page = 1;
+      let url = "https://pim.wforwoman.com/pim/pimresponse.php/?service=category&store=1&url_key=top-wear-kurtas&page=1&count=20&sort_by=&sort_dir=desc&filter="
+    $scope.getAllProducts = () => {
+      
+      $http({
+        method: "GET",
+        url: url,
+        header: {
+          "Content-type": "application/json"
+        }
+      }).then((res)=>{
+          let allData = res.data.result;
+      
+        
+          $scope.filters = allData.filters
+          console.warn("Filters",$scope.filters)
+          $scope.products = allData.products;
+          let AllProducts = allData.products;
+          console.warn("Response",$scope.products)
+          
+    
+    // Call the function to add 'selected' key to each option
+  
+
+        
+          $scope.filterProduct = (option)=>{
+            const result = option.replace(/\s+/g, '');
+            console.log("Result",result)
+            $scope.products = ""
+            if(jQuery('#option_'+option).prop('checked')){
+              $scope.filterProducts = AllProducts.filter(item =>{
+                if(option == item.category){
+                  console.log("cat", item)
+                  $scope.products = item
+                }
+                if(option == item.color){
+                   console.log("Color", item)
+                  $scope.products = item
+                }
+                if(option == item.neck){
+                   console.log("Neck Type", item)
+                  $scope.products = item
+                }
+                if(option == item.sleeve){
+                console.log("sleeve", item)
+                  $scope.products = item
+                }
+                if(option == item.occasion){
+                console.log("Occasion", item)
+                }
+                if(result == item.length){
+                console.log("Length", item)
+                  $scope.products = item
+                }
+                if(result == item.fastening_closure){
+                   console.log("fastening_closure", item)
+                  $scope.products = item
+                }
+                if(result == item.pattern){
+                console.log("Pattern", item)
+                  $scope.products = item
+                }
+                if(result == item.ornamentation){
+                   console.log("Ornamentation", item)
+                  $scope.products = item
+                }
+                if(result == item.closure){
+                console.log("Closure", item)
+                  $scope.products = item
+                }
+                if(result == item.fabric_family){
+                console.log("Fabric", item)
+                  $scope.products = item
+                }
+               
+                console.warn("Filtred Products",$scope.filterProducts)
+              })
+            }else{
+              console.log("Not Checked")
+            }
+            
+                
+            
+               
+                
+          }
+
+      })
+    }
+
+    $scope.getAllProducts()
+    $scope.showMe = ()=>{
+      jQuery('#showMeNow').css("display","block")
+    }
+    // $scope.loadMore = function() {
+    //    $http({url:url,method:"GET"}).then(function(response) {
+    //    $scope.products = $scope.products.concat(response.data.items);
+    //    $scope.page++;
+    //    }, function(error) {
+    //    console.error(error);
+    //    });
+    // }
+    
+
+
+  });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.2/umd/popper.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.0/js/bootstrap.min.js"></script>
+
+
+
+
+</html>
